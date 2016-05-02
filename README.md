@@ -1,3 +1,5 @@
+* As noted below, this project was done together with my team-mates: Firus](https://github.com/firusfaizal), [Hakim](https://github.com/hakimishere), [KT](https://github.com/khoodose) and [Leok Si](https://github.com/leokleok)
+
 # Tradist: A Financial Visualization and Portfolio Tracking Service
 
 ### Overview
