@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Heatmap</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.rawgit.com/etpinard/plotlyjs-finance/master/plotlyjs-finance.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
+
+    <body>
+
+    <style>
+    #header{
+    border: 1px solid black;
+    width: 100%;
+    height: 130px;
+    background-color: rgba(42,63,84,1)
+    }
+
+    h1 {color:white;
+      margin-top: -40px
+    }
+    h5 {color:white;}
+
+    #home_button {
+      margin-left: 30px;
+      margin-top: 30px;
+    }
+
+    #button_divider {
+      display: flex;
+      flex-direction: row;
+      margin-left: 30%;
+    }
+
+    #separator {
+      width: 10px;
+    }
+    </style>
+
+
+
+    <div id="header">
+      <div>
+        <a href="/home" id="home_button" class="btn btn-warning btn-md" role="button" class="glyphicon glyphicon-home" aria-hidden="true"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>    HOME</a>
+          <center>
+              <h1>Heatmap Correlation Chart</h1>
+          </center>
+      </div>
+
+      <center>
+          <div id="button_divider">
+              <div id="2Children">
+                <!-- <h5>1.First Load all Data from Charts</h5> -->
+                <div id="load" class="btn btn-primary btn-md">1. LOAD ALL DATA FROM CHART</div>
+              </div>
+            <div id="separator"></div>
+              <div id="2Children">
+                <!-- <h5>2.Next Run Pearson Correlation Tests</h5> -->
+                <div id="calculate" class="btn btn-primary btn-md">2. CALCULATE CORRELATION</div>
+              </div>
+          </div>
+    </center>
+    </div>
+
+  <div id="myDiv" style="width: 100%; height: 600px;"><!-- Plotly chart will be drawn inside this DIV --></div>
+
+  <!-- <div id="tester" style="width:800px;height:400px;"></div> -->
+
+
+<script>
+
+  $(document).ready(function() {
+
+    //PEARSON CORRELATION
+    function getPearsonCorrelation(x, y) {
+        var shortestArrayLength = 0;
+
+        if(x.length == y.length) {
+            shortestArrayLength = x.length;
+        }
+        else if(x.length > y.length) {
+            shortestArrayLength = y.length;
+            console.error('x has more items in it, the last ' + (x.length - shortestArrayLength) + ' item(s) will be ignored');
+        }
+        else {
+            shortestArrayLength = x.length;
+            console.error('y has more items in it, the last ' + (y.length - shortestArrayLength) + ' item(s) will be ignored');
+        }
+
+        var xy = [];
+        var x2 = [];
+        var y2 = [];
+
+        for(var i=0; i<shortestArrayLength; i++) {
+            xy.push(x[i] * y[i]);
+            x2.push(x[i] * x[i]);
+            y2.push(y[i] * y[i]);
+        }
+
+        var sum_x = 0;
+        var sum_y = 0;
+        var sum_xy = 0;
+        var sum_x2 = 0;
+        var sum_y2 = 0;
+
+        for(var i=0; i< shortestArrayLength; i++) {
+            sum_x += x[i];
+            sum_y += y[i];
+            sum_xy += xy[i];
+            sum_x2 += x2[i];
+            sum_y2 += y2[i];
+        }
+
+        var step1 = (shortestArrayLength * sum_xy) - (sum_x * sum_y);
+        var step2 = (shortestArrayLength * sum_x2) - (sum_x * sum_x);
+        var step3 = (shortestArrayLength * sum_y2) - (sum_y * sum_y);
+        var step4 = Math.sqrt(step2 * step3);
+        var answer = step1 / step4;
+
+          console.log(answer);
+          return answer;
+    }
+
+    $("#load").click(function(){
+      var apple = []
+      var applePrice = []
+      $.get('/api/ticker/Apple?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                apple.push(data1);
+                console.log(apple)
+                for(var i = 0; i < apple.length; i++) {
+              console.log(apple[i])
+                  apple[i].forEach(function(e){
+                      applePrice.push(e.price)
+                  })
+                }
+                console.log(applePrice);
+                localStorage.setItem("applePrice", applePrice);
+                }
+            )
+
+      var bp = []
+      var bpPrice = []
+      $.get('/api/ticker/British Petroleum?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                bp.push(data1);
+                console.log(bp)
+                for(var i = 0; i < bp.length; i++) {
+              console.log(bp[i])
+                  bp[i].forEach(function(e){
+                  bpPrice.push(e.price)
+                  })
+                }
+                console.log(bpPrice);
+                localStorage.setItem("bpPrice", bpPrice);
+                }
+            )
+
+      var chevron = []
+      var chevronPrice = []
+      $.get('/api/ticker/Chevron?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                chevron.push(data1);
+                console.log(chevron)
+                for(var i = 0; i < chevron.length; i++) {
+              console.log(chevron[i])
+                  chevron[i].forEach(function(e){
+                      chevronPrice.push(e.price)
+                  })
+                }
+                console.log(chevronPrice);
+                localStorage.setItem("chevronPrice", chevronPrice);
+                }
+            )
+
+      var mexican = []
+      var mexicanPrice = []
+      $.get('/api/ticker/Chipotle Mexican Grill?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                mexican.push(data1);
+                console.log(mexican)
+                for(var i = 0; i < mexican.length; i++) {
+              console.log(mexican[i])
+                  mexican[i].forEach(function(e){
+                      mexicanPrice.push(e.price)
+                  })
+                }
+                console.log(mexicanPrice);
+                localStorage.setItem("mexicanPrice", mexicanPrice);
+                }
+            )
+
+      var google = []
+      var googlePrice = []
+      $.get('/api/ticker/Alphabet?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                google.push(data1);
+                console.log(google)
+                for(var i = 0; i < google.length; i++) {
+              console.log(google[i])
+                  google[i].forEach(function(e){
+                      googlePrice.push(e.price)
+                  })
+                }
+                console.log(googlePrice);
+                localStorage.setItem("googlePrice", googlePrice);
+                }
+            )
+
+
+      var mcdonalds = []
+      var mcdonaldsPrice = []
+      $.get('/api/ticker/Mcdonalds?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                mcdonalds.push(data1);
+                console.log(mcdonalds)
+                for(var i = 0; i < mcdonalds.length; i++) {
+              console.log(mcdonalds[i])
+                  mcdonalds[i].forEach(function(e){
+                      mcdonaldsPrice.push(e.price)
+                  })
+                }
+                console.log(mcdonaldsPrice);
+                localStorage.setItem("mcdonaldsPrice", mcdonaldsPrice);
+                }
+            )
+
+      var starbucks = []
+      var starbucksPrice = []
+      $.get('/api/ticker/Starbucks?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                starbucks.push(data1);
+                console.log(starbucks)
+                for(var i = 0; i < starbucks.length; i++) {
+              console.log(starbucks[i])
+                  starbucks[i].forEach(function(e){
+                      starbucksPrice.push(e.price)
+                  })
+                }
+                console.log(starbucksPrice);
+                localStorage.setItem("starbucksPrice", starbucksPrice);
+                }
+            )
+
+      var yahoo = []
+      var yahooPrice = []
+      $.get('/api/ticker/Yahoo?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                yahoo.push(data1);
+                console.log(yahoo)
+                for(var i = 0; i < yahoo.length; i++) {
+              console.log(yahoo[i])
+                  yahoo[i].forEach(function(e){
+                      yahooPrice.push(e.price)
+                  })
+                }
+                console.log(yahooPrice);
+                localStorage.setItem("yahooPrice", yahooPrice);
+                }
+            )
+
+      var allergan = []
+      var allerganPrice = []
+      $.get('/api/ticker/Allergan?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                allergan.push(data1);
+                console.log(allergan)
+                for(var i = 0; i < allergan.length; i++) {
+              console.log(allergan[i])
+                  allergan[i].forEach(function(e){
+                      allerganPrice.push(e.price)
+                  })
+                }
+                console.log(allerganPrice);
+                localStorage.setItem("allerganPrice", allerganPrice);
+                }
+            )
+
+      var djia = []
+      var djiaPrice = []
+      $.get('/api/ticker/DJIA?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                djia.push(data1);
+                console.log(djia)
+                for(var i = 0; i < djia.length; i++) {
+                  djia[i].forEach(function(e){
+                    if (typeof e.price === "number") {
+                      djiaPrice.push(e.price)
+                    } else {
+                      console.log(e.price)
+                    }
+
+                  })
+                }
+                console.log(djiaPrice);
+                localStorage.setItem("djiaPrice", djiaPrice);
+                }
+            );
+
+      var gold = []
+      var goldPrice = []
+      $.get('/api/ticker/Gold?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                gold.push(data1);
+                console.log(gold)
+                for(var i = 0; i < gold.length; i++) {
+                  gold[i].forEach(function(e){
+                    if (typeof e.price === "number") {
+                      goldPrice.push(e.price)
+                    } else {
+                      console.log(e.price)
+                    }
+
+                  })
+                }
+                console.log(goldPrice);
+                localStorage.setItem("goldPrice", goldPrice);
+                }
+            )
+
+
+      var crudeoil = []
+      var crudeoilPrice = []
+      $.get('/api/ticker/Crude Oil?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                crudeoil.push(data1);
+                console.log(crudeoil)
+                for(var i = 0; i < crudeoil.length; i++) {
+                  crudeoil[i].forEach(function(e){
+                    if (typeof e.price === "number") {
+                      crudeoilPrice.push(e.price)
+                    } else {
+                      console.log(e.price)
+                    }
+
+                  })
+                }
+                console.log(crudeoilPrice);
+                localStorage.setItem("crudeoilPrice", crudeoilPrice);
+                }
+            )
+
+      var iron = []
+      var ironPrice = []
+      $.get('/api/ticker/Iron Ore?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                iron.push(data1);
+                console.log(iron)
+                for(var i = 0; i < iron.length; i++) {
+                  iron[i].forEach(function(e){
+                    if (typeof e.price === "number") {
+                      ironPrice.push(e.price)
+                    } else {
+                      console.log(e.price)
+                    }
+
+                  })
+                }
+                console.log(ironPrice);
+                localStorage.setItem("ironPrice", ironPrice);
+                }
+            )
+
+
+      var coffee = []
+      var coffeePrice = []
+      $.get('/api/ticker/Coffee?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                coffee.push(data1);
+                console.log(coffee)
+                for(var i = 0; i < coffee.length; i++) {
+                  coffee[i].forEach(function(e){
+                    if (typeof e.price === "number") {
+                      coffeePrice.push(e.price)
+                    } else {
+                      console.log(e.price)
+                    }
+
+                  })
+                }
+                console.log(coffeePrice);
+                localStorage.setItem("coffeePrice", coffeePrice);
+                }
+            )
+
+      var copper = []
+      var copperPrice = []
+      $.get('/api/ticker/Copper?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                copper.push(data1);
+                console.log(copper)
+                for(var i = 0; i < copper.length; i++) {
+                  copper[i].forEach(function(e){
+                    if (typeof e.price === "number") {
+                      copperPrice.push(e.price)
+                    } else {
+                      console.log(e.price)
+                    }
+
+                  })
+                }
+                console.log(copperPrice);
+                localStorage.setItem("copperPrice", copperPrice);
+                }
+            )
+
+      var tenyear = []
+      var tenyearPrice = []
+      $.get('/api/ticker/10YRT?token=' + window.localStorage.getItem('token'), function (data1) {
+                console.log(data1)
+                tenyear.push(data1);
+                console.log(tenyear)
+                for(var i = 0; i < tenyear.length; i++) {
+                  tenyear[i].forEach(function(e){
+                    if (typeof e.price === "number") {
+                      tenyearPrice.push(e.price)
+                    } else {
+                      console.log(e.price)
+                    }
+
+                  })
+                }
+                console.log(tenyearPrice);
+                localStorage.setItem("tenyearPrice", tenyearPrice);
+                }
+            )
+    });
+
+
+
+    $("#calculate").click(function(){
+
+      var appleP       = []
+      var bpP          = []
+      var chevronP     = []
+      var mexicanP     = []
+      var googleP      = []
+      var mcdonaldsP   = []
+      var starbucksP   = []
+      var yahooP       = []
+      var allerganP    = []
+      var djiaP        = []
+      var goldP        = []
+      var crudeoilP  = []
+      var ironP  = []
+      var coffeeP = []
+      var copperP  = []
+      var tenyearP  = []
+
+      var a = localStorage.getItem('applePrice').split(',').forEach(function(e) {
+        appleP.push(parseFloat(e))
+      })
+      var b = localStorage.getItem('bpPrice').split(',').forEach(function(e) {
+        bpP.push(parseFloat(e))
+      })
+      var c = localStorage.getItem('chevronPrice').split(',').forEach(function(e) {
+        chevronP.push(parseFloat(e))
+      })
+      var d = localStorage.getItem('mexicanPrice').split(',').forEach(function(e) {
+        mexicanP.push(parseFloat(e))
+      })
+      var e = localStorage.getItem('googlePrice').split(',').forEach(function(e) {
+        googleP.push(parseFloat(e))
+      })
+      var f = localStorage.getItem('mcdonaldsPrice').split(',').forEach(function(e) {
+        mcdonaldsP.push(parseFloat(e))
+      })
+      var g = localStorage.getItem('starbucksPrice').split(',').forEach(function(e) {
+        starbucksP.push(parseFloat(e))
+      })
+      var h = localStorage.getItem('yahooPrice').split(',').forEach(function(e) {
+        yahooP.push(parseFloat(e))
+      })
+      var i = localStorage.getItem('allerganPrice').split(',').forEach(function(e) {
+        allerganP.push(parseFloat(e))
+      })
+      var j = localStorage.getItem('djiaPrice').split(',').forEach(function(e) {
+        djiaP.push(parseFloat(e))
+      })
+      var k = localStorage.getItem('goldPrice').split(',').forEach(function(e) {
+        goldP.push(parseFloat(e))
+      })
+      var l = localStorage.getItem('crudeoilPrice').split(',').forEach(function(e) {
+        crudeoilP.push(parseFloat(e))
+      })
+      var m = localStorage.getItem('ironPrice').split(',').forEach(function(e) {
+        ironP.push(parseFloat(e))
+      })
+      var n = localStorage.getItem('coffeePrice').split(',').forEach(function(e) {
+        coffeeP.push(parseFloat(e))
+      })
+      var o = localStorage.getItem('copperPrice').split(',').forEach(function(e) {
+        copperP.push(parseFloat(e))
+      })
+      var p = localStorage.getItem('tenyearPrice').split(',').forEach(function(e) {
+        tenyearP.push(parseFloat(e))
+      })
+
+
+      //CREATE 2 ARRAYS ON THE X AND Y-AXES
+      var xAxis = [appleP, bpP, chevronP, mexicanP, googleP, mcdonaldsP, starbucksP, yahooP,
+      allerganP, djiaP, goldP, crudeoilP, ironP, coffeeP, copperP, tenyearP ]
+      console.log(xAxis)
+
+      var yAxis = xAxis
+      console.log(yAxis)
+
+      //getPearsonCorrelation
+
+      var motherRow = []
+
+      for (var j=0; j < xAxis.length; j++) {
+        var row = []
+        for (var i=0; i < yAxis.length; i++) {
+          var result = getPearsonCorrelation(xAxis[j], yAxis[i])
+          row.push(result.toFixed(2))
+        }
+        motherRow.push(row)
+      }
+      console.log(motherRow)
+      //TEST HERE
+
+      var xValues = ['Apple', 'BP', 'Chevron', 'Chipotle', 'Google', 'Mcdonalds', 'Starbucks', 'Yahoo', 'Allergan', 'DJIA', 'Gold', 'Crude Oil', 'Iron', 'Coffee', 'Copper', '10 Year Treasury'].reverse();
+      var yValues = ['Apple', 'BP', 'Chevron', 'Chipotle', 'Google', 'Mcdonalds', 'Starbucks', 'Yahoo', 'Allergan', 'DJIA', 'Gold', 'Crude Oil', 'Iron', 'Coffee', 'Copper', '10 Year Treasury'].reverse();
+
+
+      var zValues = motherRow
+
+
+      // [
+      //   [0, -0.80, 0.75, 0.75, 0.00,0.00, 0.00, 0.75, 0.75, 0.00, 1],
+      //   [0.00, 0, 0.75, 0.75, 0.00,0.00, 0.00, 0.00, 0.75, 1, -0.15],
+      //   [0.75, -0.75, 0, 0.75, 0.75,0.75, 0.75, 0.75, 1, 0.75, 0.75],
+      //   [0.00, -0.3, 0.00, 0, 0.00,0.00, 0.00, 1, 0.75, 0.00, -0.4],
+      //   [-0.10, 0.00, 0.00, 0.75, 0,0.00, 1, 0.00, 0.75, 0.00, 0.0],
+      //   [0.00, 0.00, 0.75, 0.75, 0.00, 1, 0.75, 0.75, 0.75, 0.75, 0.25],
+      //   [0.00, 0.00, 0.75, -0.75, 1,0.00, 0, 0.00, 0.75, 0.00, 0.75],
+      //   [0.75, 0.75, 0.75, 1, 0.75,0.00, 0.00, 0, 0.75, 0.00, 0.75],
+      //   [0.00, 0.00, 1, -0.75, 0.00,0.00, 0.00, -0.4, 0, 0.00, 0.5],
+      //   [0.00, 1, 0.00, 0.75, 0.00,0.00, 0.00, 0.75, 0.75, 0, -0.75],
+      //   [1, -0.70, 0.00, 0.75, 0.00,0.75, 0.75, 0.75, 0.75, 0.75, 0]
+      // ];
+
+      var colorscaleValue = [
+        [-1, 'rgb(255,0,0)'],
+        [1, 'rgb(0,0,255)']
+      ];
+
+      var data = [{
+        x: xValues,
+        y: yValues,
+        z: zValues,
+        type: 'heatmap',
+        colorscale: colorscaleValue,
+        showscale: true
+      }];
+
+      var layout = {
+        title: 'Correlation Heatmap',
+        annotations: [],
+        xaxis: {
+          ticks: '',
+          side: 'top'
+        },
+        yaxis: {
+          ticks: '',
+          ticksuffix: ' ',
+          width: 700,
+          height: 700,
+          autosize: false
+        }
+      };
+
+      for ( var i = 0; i < yValues.length; i++ ) {
+        for ( var j = 0; j < xValues.length; j++ ) {
+          var currentValue = zValues[i][j];
+          if (currentValue != 0.0) {
+            var textColor = 'white';
+          }else{
+            var textColor = 'black';
+          }
+          var result = {
+            xref: 'x1',
+            yref: 'y1',
+            x: xValues[j],
+            y: yValues[i],
+            text: zValues[i][j],
+            font: {
+              family: 'Arial',
+              size: 12,
+              color: 'rgb(50, 171, 96)'
+            },
+            showarrow: false,
+            font: {
+              color: textColor
+            }
+          };
+          layout.annotations.push(result);
+        }
+      }
+
+      Plotly.newPlot('myDiv', data, layout);
+
+
+
+
+
+
+
+
+
+    });
+
+});
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

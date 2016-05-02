@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+    
+<body>
+    <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
+    
+    <script>
+    
+        var xValues = ['Iron Ore', 'Gold', 'Dow Jones Index', 'Crude Oil', 'Copper', 'Coffee', '10Year Treasury', 'Apple', 'Starbucks', 'British Petroleum', 'STI Index'];
+       
+var yValues = ['STI Index','British Petroleum','Starbucks','Apple', '10Year Treasury','Coffee', 'Copper', 'Crude Oil','Dow Jones Index', 'Gold','Iron Ore'   ];
+        
+
+var zValues = [
+  [0, -0.80, 0.75, 0.75, 0.00,0.00, 0.00, 0.75, 0.75, 0.00, 1],
+  [0.00, 0, 0.75, 0.75, 0.00,0.00, 0.00, 0.00, 0.75, 1, -0.15],
+  [0.75, -0.75, 0, 0.75, 0.75,0.75, 0.75, 0.75, 1, 0.75, 0.75],
+  [0.00, -0.3, 0.00, 0, 0.00,0.00, 0.00, 1, 0.75, 0.00, -0.4],
+  [-0.10, 0.00, 0.00, 0.75, 0,0.00, 1, 0.00, 0.75, 0.00, 0.0],
+  [0.00, 0.00, 0.75, 0.75, 0.00, 1, 0.75, 0.75, 0.75, 0.75, 0.25],
+  [0.00, 0.00, 0.75, -0.75, 1,0.00, 0, 0.00, 0.75, 0.00, 0.75],
+  [0.75, 0.75, 0.75, 1, 0.75,0.00, 0.00, 0, 0.75, 0.00, 0.75],
+  [0.00, 0.00, 1, -0.75, 0.00,0.00, 0.00, -0.4, 0, 0.00, 0.5],
+  [0.00, 1, 0.00, 0.75, 0.00,0.00, 0.00, 0.75, 0.75, 0, -0.75],
+  [1, -0.70, 0.00, 0.75, 0.00,0.75, 0.75, 0.75, 0.75, 0.75, 0]
+];
+
+var colorscaleValue = [
+  [-1, 'rgb(255,0,0)'],
+  [1, 'rgb(0,0,255)']
+];
+
+var data = [{
+  x: xValues,
+  y: yValues,
+  z: zValues,
+  type: 'heatmap',
+  colorscale: colorscaleValue,
+  showscale: true
+}];
+
+var layout = {
+  title: 'Annotated Heatmap',
+  annotations: [],
+  xaxis: {
+    ticks: '',
+    side: 'top'
+  },
+  yaxis: {
+    ticks: '',
+    ticksuffix: ' ',
+    width: 700,
+    height: 700,
+    autosize: false
+  }
+};
+
+for ( var i = 0; i < yValues.length; i++ ) {
+  for ( var j = 0; j < xValues.length; j++ ) {
+    var currentValue = zValues[i][j];
+    if (currentValue != 0.0) {
+      var textColor = 'white';
+    }else{
+      var textColor = 'black';
+    }
+    var result = {
+      xref: 'x1',
+      yref: 'y1',
+      x: xValues[j],
+      y: yValues[i],
+      text: zValues[i][j],
+      font: {
+        family: 'Arial',
+        size: 12,
+        color: 'rgb(50, 171, 96)'
+      },
+      showarrow: false,
+      font: {
+        color: textColor
+      }
+    };
+    layout.annotations.push(result);
+  }
+}
+
+Plotly.newPlot('myDiv', data, layout);
+    
+    </script>
+    
+    
+    
+    
+    
+    </body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+</head>
+<body>
+  <!-- <form>
+
+    <input id="name" type="text" name="name">
+    <input id="password" type="password" name="password">
+    <button type="submit">Login</button>
+
+
+  </form> -->
+<style>
+#formcontainer {
+ margin: 0, auto;
+ margin-top: 50px;
+ margin-left: 15%;
+}
+
+h2 {
+  margin-left: 10px;
+  z-index: 10;
+  color: white;
+}
+
+#translucent {
+  background-color: rgba(255,255,255, 0.2);
+  border: 1px solid rgba(50,50,50,0.3);
+  z-index: 0;
+  width: 400px;
+  height: 700px;
+  margin-left: 30px;
+  border-radius: 30px;
+  margin-top: 30px;
+}
+
+body {
+  background-image: url("img/wallstreet.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 50%;
+}
+
+</style>
+
+
+<div id="translucent">
+<div id="formcontainer">
+
+  <h2>API Logins</h2>
+  <center>
+  <form class="form-horizontal">
+    <div class="form-group">
+      <!-- <label for="inputEmail3" class="col-sm-2">Name</label> -->
+
+      <div class="col-md-8">
+        <input type="text" class="form-control" id="name" placeholder="Name">
+      </div>
+    </div>
+    <div class="form-group">
+      <!-- <label for="inputPassword3" class="col-sm-2 control-label">Password</label> -->
+      <div class="col-md-8">
+        <input type="password" class="form-control" id="password" placeholder="Password">
+      </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-1">
+        <button type="submit" class="btn btn-default">Sign in</button>
+      </div>
+    </div>
+  </form>
+  </center>
+</div>
+</div>
+
+  <script type="text/javascript">
+    $('form').submit(function (event) {
+      event.preventDefault()
+      var name = $('input[type="text"]').val()
+      var password = $('input[type="password"]').val()
+      $.ajax({
+        method: 'POST',
+        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+        url: '/authenticate',
+        data: {
+          name: name,
+          password: password
+        }
+      }).done(function (result) {
+        console.log(result)
+        window.localStorage.clear()
+        window.localStorage.setItem('token', result.token)
+        window.location.href = "/home"
+      })
+
+    })
+  </script>
+</body>
+</html>

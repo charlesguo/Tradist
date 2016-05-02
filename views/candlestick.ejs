@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.rawgit.com/etpinard/plotlyjs-finance/master/plotlyjs-finance.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
+<body>
+    <center>
+        <h1>Candlestick Chart</h1>
+        <a href="/home" class="btn btn-danger btn-md" role="button" class="glyphicon glyphicon-home" aria-hidden="true"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>    HOME</a>
+    </center>
+
+    <center>
+        <select id="tickerSelector">
+          <option value="Apple">Apple</option>
+          <option value="British Petroleum">British Petroleum</option>
+          <option value="Chevron">Chevron</option>
+          <option value="Chipotle Mexican Grill">Chipotle Mexican Grill</option>
+          <option value="Alphabet">Google</option>
+          <option value="Mcdonalds">Mcdonalds</option>
+          <option value="Starbucks">Starbucks</option>
+          <option value="Yahoo">Yahoo</option>
+          <option value="Allergan">Allergan</option>
+        </select>
+    </center>
+
+  <div id="myDiv" style="width: 100%; height: 600px;"><!-- Plotly chart will be drawn inside this DIV --></div>
+
+  <!-- <div id="tester" style="width:800px;height:400px;"></div> -->
+
+  <script>
+
+  $(document).ready(function() {
+
+    $('#tickerSelector').on('change', function(){
+
+      var selection = this.value;
+      // alert(selection);
+
+      $.get('/api/ticker/'+ selection + '?token=' + window.localStorage.getItem('token'), function (data) {
+                    console.log(data);
+                    makeplot(data, data[0].name);
+
+      });
+
+  });
+
+    $.get('/api/ticker/<%= stockName %>?token=' + window.localStorage.getItem('token'), function (data) {
+                  console.log(data);
+                  makeplot(data, data[0].name);
+                });
+
+      });
+
+  function makeplot(data, name) {
+    var data_open = [], data_close = [], data_high = [], data_low = [], data_dates = [];
+
+    for (var i=0; i<data.length; i++) {
+       var data_obj = data[i];
+       data_close.push(parseFloat(data_obj["close"]));
+       data_high.push(parseFloat(data_obj["high"]));
+       data_low.push(parseFloat(data_obj["low"]));
+       data_open.push(parseFloat(data_obj["open"]));
+       data_dates.push([data_obj["date"].split("-")].map(function(d) {
+         return new Date(d[0], d[1]-1, d[2].substring(0,1));
+       }))
+    }
+    makePlotly( data_open, data_close, data_high, data_low, data_dates, name);
+    console.log(data_dates.length);
+
+};
+
+function makePlotly( data_open, data_close, data_high, data_low, data_dates, name){
+  var dateArray = []
+
+  data_dates.forEach(function(e){
+    dateArray.push(e[0])
+  })
+
+  console.log(dateArray[1]);
+
+  var fig = PlotlyFinance.createCandlestick({
+    open: data_open,
+    high: data_high,
+    low: data_low,
+    close: data_close,
+    dates: dateArray
+  });
+
+  console.log(dateArray);
+  console.log(data_close);
+
+  fig.layout.title = name + " Prices between " + data_dates[0].toString().substring(0,15) + " and " + data_dates[data_dates.length-1].toString().substring(0,15);
+  fig.layout.xaxis.title = 'Dates';
+  fig.layout.yaxis.title = 'Price';
+
+  Plotly.newPlot('myDiv', fig.data, fig.layout);
+};
+  </script>
+</body>
+</html>

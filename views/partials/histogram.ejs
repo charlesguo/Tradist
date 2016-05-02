@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.rawgit.com/etpinard/plotlyjs-finance/master/plotlyjs-finance.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+</head>
+
+<body>
+  <p>Histogram View</p>
+  <div id="histogram" style="width: 100%; height: 600px;"></div>
+  <script>
+  $(document).ready(function() {
+    $.get('/api/ticker/Apple?token=' + window.localStorage.getItem('token'), function (data1) {
+      console.log(data1);
+      plotHistogram(data1);
+    });
+  });
+
+    function plotHistogram(data) {
+      var x = [];
+
+      for (var i = 0; i < data.length; i ++) {
+        x[i] = data[i]["volume"];
+      };
+
+      var dataFeed = [
+        {
+          x: x,
+          type: 'histogram'
+        }
+      ];
+
+      var layout = {
+        title: "Histogram of Trading Volume for " + data[0]["name"] + " between " + data[data.length-1]["date"].substring(0,10) + " and " + data[0]["date"].substring(0,10),
+        xaxis: {
+          title: "Days grouped by trading volume"
+        },
+        yaxis: {
+          title: "Number of days in trading range"
+        },
+        bargap: 0.1
+      };
+
+      Plotly.newPlot('histogram', dataFeed, layout);
+    };
+
+  </script>

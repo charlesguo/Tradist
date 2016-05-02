@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- <script defer src="../public/multiple.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <p>Timeseries View</p>
+  <div id="timeseries" style="width: 100%; height: 500px;"></div>
+</body>
+
+
+<script>
+
+$(document).ready(function() {
+
+  var gold = {};
+  var crudeOil = {};
+
+  $.get('/api/ticker/Gold?token=' + window.localStorage.getItem('token'), function(data1) {
+    console.log(data1);
+    gold = data1
+
+  $.get('/api/ticker/Crude%20Oil?token=' + window.localStorage.getItem('token'), function(data2) {
+      console.log(data2)
+      crudeOil = data2;
+      plotMe(gold, crudeOil);
+    });
+  });
+
+
+    function plotMe(data1, data2){
+
+        x_val = [];
+        y_val = [];
+
+
+        console.log(data1[1]["date"]);
+        for (var i = 0; i < data1.length; i++) {
+            	x_val.push(data1[i]["date"]);
+              y_val.push(data1[i]["price"]);
+        };
+
+
+        x_val2 = [];
+        y_val2 = [];
+
+        for (var i = 0; i < data2.length; i++) {
+              x_val2.push(data2[i]["date"]);
+              y_val2.push(data2[i]["price"]);
+            };
+
+        console.log(x_val2);
+
+        var dataCombine = [{x:x_val, y:y_val, name: gold[0].name, type: 'scatter'}, { x:x_val, y:y_val2, name: crudeOil[0].name, yaxis: 'y2', type: 'scatter'}];
+
+        var layout = {
+            title: gold[0]["name"] + " vs " + crudeOil[0]["name"],
+            yaxis: {
+                    title: gold[0].name + " Prices",
+                    titlefont: {color: 'rgb(39, 0, 170)'},
+                    tickfont: {color: 'rgb(89, 30, 250)'}
+                  },
+            yaxis2: {
+              title: crudeOil[0].name + " Prices",
+              titlefont: {color: 'rgb(255, 137, 0)'},
+              tickfont: {color: 'rgb(186, 100, 0)'},
+              overlaying: 'y',
+              side: 'right'
+            },
+            xaxis: {
+                    tickformat: "%x"
+                   }
+            };
+
+        Plotly.newPlot('timeseries', dataCombine, layout);
+    };
+
+});
+
+  </script>
+</html>

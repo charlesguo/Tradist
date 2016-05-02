@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- <script defer src="../public/multiple.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
+
+<body>
+        <center>
+            <h1>Time Series Chart</h1>
+            <a href="/home" class="btn btn-danger btn-md" role="button" class="glyphicon glyphicon-home" aria-hidden="true"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>    HOME</a>
+        </center>
+
+        <center>
+            <form id="myForm" action="form_action.asp">
+                <h4>Choose Ticker 1</h4>
+                <select id="tickerSelector1">
+                  <option value="Apple">Apple</option>
+                  <option value="British Petroleum">British Petroleum</option>
+                  <option value="Chevron">Chevron</option>
+                  <option value="Chipotle Mexican Grill">Chipotle Mexican Grill</option>
+                  <option value="Alphabet">Google</option>
+                  <option value="Mcdonalds">Mcdonalds</option>
+                  <option value="Starbucks">Starbucks</option>
+                  <option value="Yahoo">Yahoo</option>
+                  <option value="Allergan">Allergan</option>
+                  <option value="DJIA">Dow Jones Industrial</option>
+                  <option value="Gold">Gold</option>
+                  <option value="Crude Oil">Crude Oil</option>
+                  <option value="Iron Ore">Iron Ore</option>
+                  <option value="Coffee">Coffee</option>
+                  <option value="Copper">Copper</option>
+                  <option value="10YRT">10 Year Treasury</option>
+                </select>
+
+                <h4>Choose Ticker 2</h4>
+                <select id="tickerSelector2">
+                  <option value="Apple">Apple</option>
+                  <option value="British Petroleum">British Petroleum</option>
+                  <option value="Chevron">Chevron</option>
+                  <option value="Chipotle Mexican Grill">Chipotle Mexican Grill</option>
+                  <option value="Alphabet">Google</option>
+                  <option value="Mcdonalds">Mcdonalds</option>
+                  <option value="Starbucks">Starbucks</option>
+                  <option value="Yahoo">Yahoo</option>
+                  <option value="Allergan">Allergan</option>
+                  <option value="DJIA">Dow Jones Industrial</option>
+                  <option value="Gold">Gold</option>
+                  <option value="Crude Oil">Crude Oil</option>
+                  <option value="Iron Ore">Iron Ore</option>
+                  <option value="Coffee">Coffee</option>
+                  <option value="Copper">Copper</option>
+                  <option value="10YRT">10 Year Treasury</option>
+                </select>
+                <br>
+                <br>
+                <input id="submitButton" type="button" value="SUBMIT">
+            </form>
+        </center>
+
+  <div id="myDiv" style="width: 100%; height: 500px;"></div>
+</body>
+
+
+<script>
+
+$(document).ready(function() {
+
+  var type1 = {};
+  var type2 = {};
+
+    $.get({
+        url: '/api/ticker/<%= stockName1 %>?token=' + window.localStorage.getItem('token'),
+        success: function (data1) {
+                    console.log(data1);
+                    type1 = data1;
+
+                    $.get({
+                        url: '/api/ticker/<%= stockName2 %>?token=' + window.localStorage.getItem('token'),
+                        success: function (data2) {
+                                    console.log(data2);
+                                    type2 = data2;
+                                    plotMe(type1, type2);
+                        }
+                    });
+        }
+    });
+
+    // when submit button is clicked, run the function below
+    $('#submitButton').on('click', function(){
+    // get the values currently in ticker1 and ticker2
+          var ticker1 = $('#tickerSelector1').val();
+          var ticker2 = $('#tickerSelector2').val();
+
+         var type1 = {};
+         var type2 = {};
+
+    // pass the two values through to the graphing function
+         $.get({
+             url: '/api/ticker/' + ticker1 + '?token=' + window.localStorage.getItem('token'),
+             success: function (data1) {
+                         console.log(data1);
+                         type1 = data1;
+
+                         $.get({
+                             url: '/api/ticker/' + ticker2 +'?token=' + window.localStorage.getItem('token'),
+                             success: function (data2) {
+                                         console.log(data2);
+                                         type2 = data2;
+                                         plotMe(type1, type2);
+                             }
+                         });
+             }
+         });
+    });
+
+    function plotMe(data1, data2){
+
+        x_val = [];
+        y_val = [];
+
+        for (var i = 0; i < data1.length; i++) {
+            	x_val.push(data1[i]["date"]);
+              y_val.push(data1[i]["price"]);
+        };
+
+
+        x_val2 = [];
+        y_val2 = [];
+
+        for (var i = 0; i < data2.length; i++) {
+              x_val2.push(data2[i]["date"]);
+              y_val2.push(data2[i]["price"]);
+        };
+
+        console.log(x_val);
+        console.log(y_val);
+
+        console.log(x_val2);
+        console.log(y_val2);
+
+        var dataCombine = [{x:x_val, y:y_val, name: data1[0].name, type: 'scatter'}, { x:x_val, y:y_val2, name: data2[0].name, yaxis: 'y2', type: 'scatter'}];
+
+        var layout = {
+            title: data1[0]["name"] + " vs " + data2[0]["name"],
+            yaxis: {
+                    title: data1[0].name + " Prices",
+                    titlefont: {color: 'rgb(39, 0, 170)'},
+                    tickfont: {color: 'rgb(89, 30, 250)'}
+                    },
+            yaxis2: {
+              title: data2[0].name + " Prices",
+              titlefont: {color: 'rgb(255, 137, 0)'},
+              tickfont: {color: 'rgb(186, 100, 0)'},
+              overlaying: 'y',
+              side: 'right'
+                    },
+            xaxis: {
+                    tickformat: "%x"
+                   }
+            };
+
+        Plotly.newPlot('myDiv', dataCombine, layout);
+  }
+
+});
+
+  </script>
+</html>
