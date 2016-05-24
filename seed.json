@@ -1,5 +1,5 @@
 {
-	"undefined": "mongodb://heroku_3hvl6129:mjin809fk4u6k4jkg1it3ci4t8@ds023530.mlab.com:23530/heroku_3hvl6129",
-	"dev": "mongodb://heroku_3hvl6129:mjin809fk4u6k4jkg1it3ci4t8@ds023530.mlab.com:23530/heroku_3hvl6129",
-	"prod": "mongodb://heroku_3hvl6129:mjin809fk4u6k4jkg1it3ci4t8@ds023530.mlab.com:23530/heroku_3hvl6129"
+	"undefined": "mongodb://heroku_5v6prgw2:5mh5mokf0bqj44kgg1g0o69ara@ds011863.mlab.com:11863/heroku_5v6prgw2",
+	"dev": "mongodb://heroku_5v6prgw2:5mh5mokf0bqj44kgg1g0o69ara@ds011863.mlab.com:11863/heroku_5v6prgw2",
+	"prod": "mongodb://heroku_5v6prgw2:5mh5mokf0bqj44kgg1g0o69ara@ds011863.mlab.com:11863/heroku_5v6prgw2"
 }
